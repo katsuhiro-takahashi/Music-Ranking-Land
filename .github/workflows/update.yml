@@ -1,0 +1,36 @@
+name: Music Ranking Land Stress Test
+
+on:
+  schedule:
+    # 日本時間 土曜日 12:00（UTC 3:00）に実行
+    # cronの設定概要
+    # 0: 0分
+    # 3: 3時（UTC）＝ 日本時間 12時
+    # *: 毎日
+    # *: 毎月
+    # 6: 土曜日（0が日曜日、6が土曜日）
+    - cron: '0 3 * * 6'
+  workflow_dispatch:      # 手動実行ボタン
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 google-genai
+      - name: Run app.py
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python app.py
+      - name: Commit and Push
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git commit -m "Auto: Periodic Update $(date +'%Y-%m-%d %H:%M')" || exit 0
+          git push

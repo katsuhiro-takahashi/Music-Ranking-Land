@@ -1,0 +1,87 @@
+/* style.css */
+body { margin: 0; padding: 0; background: #f4f4f4; font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; }
+.container { display: flex; flex-wrap: wrap; max-width: 1100px; margin: 0 auto; min-height: 100vh; }
+
+/* メインコンテンツ */
+main { flex: 3; min-width: 320px; padding: 30px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+
+.main-ranking {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    margin-bottom: 25px;
+    border-top: 10px solid #ff0055;
+}
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+.col {
+    flex: 1;
+    min-width: 300px;
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 0.8em;
+}
+th, td {
+    border-bottom: 1px solid #eee;
+    padding: 8px 4px;
+    text-align: left;
+    vertical-align: top;
+}
+.rank-item {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+}
+.rank-item .num {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #ff0055;
+    width: 80px;
+    text-align: center;
+}
+.rank-item .song-detail {
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+.rank-item .meta {
+    color: #777;
+    font-size: 0.8rem;
+    font-weight: normal;
+}
+.ai-talk-box {
+    background: #222;
+    color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+.ai-talk-box .noizzers-talk {
+    color: #ff88aa;
+    margin-top: 0.8rem;
+}
+.ai-talk-box .glints-talk {
+    padding-bottom: 0.8rem;
+    margin-bottom: 0.8rem;
+    border-bottom: 1px solid #cccccc;
+}
+/* サイドバー */
+aside { flex: 1; min-width: 280px; padding: 30px; background: #fafafa; border-left: 1px solid #eee; }
+.sidebar-box { margin-bottom: 30px; }
+.sidebar-box h3 { font-size: 1.1em; border-bottom: 3px solid #ff0055; padding-bottom: 5px; margin-bottom: 15px; color: #111; }
+.sidebar-box ul { list-style: none; padding: 0; }
+.sidebar-box li { margin-bottom: 10px; }
+.sidebar-box a { color: #ff0055; text-decoration: none; font-weight: bold; font-size: 0.95em; }
+.sidebar-box a:hover { text-decoration: underline; }
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .container { flex-direction: column; }
+    aside { border-left: none; border-top: 2px solid #ff0055; }
+}
