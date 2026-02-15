@@ -187,6 +187,15 @@ def generate_full_html(main_content, is_in_archive=False):
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Music Ranking Land</title>
         <link rel="stylesheet" href="{path_prefix}/style.css">
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-P21011VCNS"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-P21011VCNS');
+        </script>
     </head>
     <body>
         <div class='container'>
