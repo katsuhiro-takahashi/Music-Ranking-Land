@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 from bs4 import BeautifulSoup
 from google import genai
@@ -150,7 +151,7 @@ def generate_talk(final_ranking):
     Noizzer: 毒舌、パンク好き、売れてる曲に厳しい、斜に構えた言い方。
     Glint: 丁寧、最新トレンドに詳しい、Noizzerをなだめる役。
 
-    ミッション】
+    【ミッション】
     1. 今週の1位「{final_ranking[0][0]}」、今週の2位「{final_ranking[1][0]}」、今週の3位「{final_ranking[2][0]}」についてSNSや音楽レビューサイトで囁かれている「リアルな批判」や「ひねくれた意見」をリサーチ（シミュレート）してください。
     2. Noizzerはその意見を引用しつつ、『どこかの誰かが「〇〇」なんて抜かしてたが、全くだぜ』という風に、同調して毒を吐いてください。
     3. Glintはそれに対し、ファン側のポジティブな意見を引用してバランスをとってください。
@@ -168,6 +169,10 @@ def generate_talk(final_ranking):
     4. 最後にGlintが締める。
     5. NoizzerとGlintの発言を区別するために<div class='noizzers-talk'>Noizzerのイジり</div><div class='glints-talk'>Glintの締めの言葉</div>という形式で出力する
     6. 発言者の名前を太字にするために<b>名前</b>という形式で出力する事、区切りは <br> を使う。
+
+    【SEO対策】    
+    1. ノリのよいページタイトルを<title>Bling-Bang-Bang-Bornが独走中？今週のヒット曲ランキング｜Noizzerが斬る最新チャート</title>の形式で出力する。
+    2. 1位、2位、3位の曲名やSNSや音楽レビューサイトで囁かれている「リアルな批判」や「ひねくれた意見」をリサーチ（シミュレート）してイケてるパワーワードを拾い、かつ、AIがレビューしている事について、それぞれカンマ区切りで、<SEO>音楽ランキング, Bling-Bang-Bang-Born, Creepy Nuts, 最新ヒット曲, AI音楽レビュー</SEO>の形式で出力する。
     """
 
     response = client.models.generate_content(
@@ -177,7 +182,15 @@ def generate_talk(final_ranking):
 
     return f"<div class='ai-talk-box'>{response.text}</div>"
 
-def generate_full_html(main_content, is_in_archive=False):
+def clean_talk_html(raw_talk_html):
+    # AIが生成した断片的なHTMLを読み込む
+    # BeautifulSoupが「閉じタグがない！」と判断したら自動で補完してくれる
+    soup = BeautifulSoup(raw_talk_html, "html.parser")
+    
+    # 綺麗に整形されたHTML（文字列）を返す
+    return soup.prettify()
+
+def generate_full_html(main_content,title="Music Ranking Land", keywords="音楽,ランキング", is_in_archive=False):
     path_prefix = ".." if is_in_archive else "."
     sidebar_html = generate_sidebar_html(path_prefix)
     
@@ -187,7 +200,9 @@ def generate_full_html(main_content, is_in_archive=False):
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Music Ranking Land</title>
+        <meta name="description" content="最新AIモデル『Noizzer』が、YouTube・Spotify・iTunesのデータを独自解析。今週のヒット曲を忖度なしでレビューする、爆速音楽ランキングメディア。">
+        <meta name="keywords" content="{keywords}">
+        <title>{title}</title>
         <link rel="stylesheet" href="{path_prefix}/style.css">
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-P21011VCNS"></script>
@@ -249,8 +264,23 @@ def create_site():
         main_html += f"<div class='rank-item'><div class='num'>{i+1}</div><div class='song-detail'> {title} <div class='meta'>Peak:{info['pk']} / Weeks:{info['weeks']}</div> <div class='score'>Score:{score}</div> <div class='explore'><a href='{amazon_url}' class='song-link' target='_blank' rel='noopener noreferrer'>Amazonで探してみる</a></div></div></div>"
     main_html += "</div>"
 
+    # AI生成文字列
+    ai_text = generate_talk(final_ranking)
+
+    # 1. <title> の中身を抽出
+    title_match = re.search(r'<title>(.*?)</title>', ai_text, re.DOTALL)
+    page_title = title_match.group(1).strip() if title_match else "Music Ranking Land"
+
+    # 2. <seo> の中身を抽出
+    seo_match = re.search(r'<SEO>(.*?)</SEO>', ai_text, re.DOTALL)
+    keywords = seo_match.group(1).strip() if seo_match else "音楽,ランキング"
+
+    # 3. それ以外（会話部分）を抽出
+    # タグ部分を空文字に置換して消し去る
+    talk_content = re.sub(r'<title>.*?</title>', '', ai_text, flags=re.DOTALL)
+    talk_content = re.sub(r'<SEO>.*?</SEO>', '', talk_content, flags=re.DOTALL).strip()
     # NoizzerとGlintのやり取り
-    main_html += generate_talk(final_ranking)
+    main_html += clean_talk_html(talk_content)
 
    # 3. Data Evidence
     main_html += "<h3>RAW DATA EVIDENCE</h3>"
@@ -268,13 +298,13 @@ def create_site():
     # --- ファイル出力 ---
     # 1. index.html
     with open("index.html", "w", encoding="utf-8") as f:
-        f.write(generate_full_html(main_html, is_in_archive=False))
+        f.write(generate_full_html(main_html, page_title, keywords, is_in_archive=False))
     
     # アーカイブ用コピー保存
     if not os.path.exists(ARCHIVE_DIR): os.makedirs(ARCHIVE_DIR)
     ts = datetime.now(JST).strftime('%Y%m%d_%H%M')
     with open(f"{ARCHIVE_DIR}/{ts}_index.html", "w", encoding="utf-8") as f:
-        f.write(generate_full_html(main_html, is_in_archive=True))
+        f.write(generate_full_html(main_html, page_title, keywords, is_in_archive=True))
     
     # アーカイブ一覧ページも更新
     create_archive_page()
