@@ -13,6 +13,9 @@ main { flex: 3; min-width: 320px; padding: 30px; background: #fff; box-shadow: 0
     margin-bottom: 25px;
     border-top: 10px solid #ff0055;
 }
+.talk {
+    margin-bottom: 1.5rem;
+}
 .grid {
     display: flex;
     flex-wrap: wrap;
@@ -49,12 +52,30 @@ th, td {
 .rank-item .song-detail {
     font-size: 1.3rem;
     font-weight: bold;
+    width: 100%;
 }
 .rank-item .meta {
     color: #777;
     font-size: 0.8rem;
     font-weight: normal;
 }
+.rank-item .explore {
+    font-size: 0.8rem;
+    font-weight: normal;
+}
+/* 曲名のリンクをサイトのデザインに馴染ませる */
+.rank-item .song-link {
+    color: #777; /* 周りの文字と同じ色 */
+    text-decoration: none; /* 下線を消す */
+    transition: color 0.2s; /* 色の変化を滑らかに */
+}
+
+/* ホバーしたときだけ「あ、これリンクなんだ」と気づかせる */
+.rank-item .song-link:hover {
+    color: #ff0055; /* 音楽らしいグリーンや、お好みのアクセントカラー */
+    text-decoration: underline; /* ホバー時だけ下線を出す */
+}
+
 .ai-talk-box {
     background: #222;
     color: #fff;

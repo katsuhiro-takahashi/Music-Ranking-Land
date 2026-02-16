@@ -3,10 +3,12 @@ import requests
 from bs4 import BeautifulSoup
 from google import genai
 from datetime import datetime, timedelta, timezone
+import urllib.parse
 
 # --- 1. 接続設定 ---
 # 公開時はこれだけにする
-API_KEY = os.getenv("GEMINI_API_KEY") 
+API_KEY = os.getenv("GEMINI_API_KEY")
+
 
 if not API_KEY:
     raise ValueError("APIキーが設定されていません。GitHubのSecretsを確認してください。")
@@ -208,6 +210,13 @@ def generate_full_html(main_content, is_in_archive=False):
     </html>
     """
 
+def create_amazon_link(song_title, artist_name):
+    # 検索キーワードを作成
+    query = f"{song_title} {artist_name}"
+    # URL用にエンコード（スペースを%20などに変換）
+    encoded_query = urllib.parse.quote(query)
+    # 現在はIDなしの純粋な検索リンク
+    return f"https://www.amazon.co.jp/s?k={encoded_query}"
 
 def create_site():
     print("--- Running Noizzer Algorithm ---")
@@ -233,7 +242,11 @@ def create_site():
     main_html += "<div class='main-ranking'>"
     for i, (title, score) in enumerate(final_ranking):
         info = song_info.get(title, {"pk":"-", "weeks":"-"})
-        main_html += f"<div class='rank-item'><div class='num'>{i+1}</div><div class='song-detail'> {title} <div class='meta'>Peak:{info['pk']} / Weeks:{info['weeks']}</div></div></div>"
+        split_word = title.split(" - ")
+        song_artist = split_word[0]
+        song_title = split_word[1] if len(split_word[1]) > 1 else "" # 2つ目がなければ空文字設定
+        amazon_url = create_amazon_link(song_artist, song_title)
+        main_html += f"<div class='rank-item'><div class='num'>{i+1}</div><div class='song-detail'> {title} <div class='meta'>Peak:{info['pk']} / Weeks:{info['weeks']}</div> <div class='score'>Score:{score}</div> <div class='explore'><a href='{amazon_url}' class='song-link' target='_blank' rel='noopener noreferrer'>Amazonで探してみる</a></div></div></div>"
     main_html += "</div>"
 
     # NoizzerとGlintのやり取り
